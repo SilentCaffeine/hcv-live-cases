@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HCV Live Cases</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fff;--bg2:#f4f4f2;--bgD:#fcebeb;--bgW:#fff4e5;--bgS:#eaf3de;
+  --tx:#1A1A1A;--tx2:#5a5a5a;--bd:rgba(0,0,0,.13);--bd2:rgba(0,0,0,.22);
+  --bdD:#f09595;--bdW:#F47920;--txD:#a32d2d;--txW:#b85800;--txS:#3b6d11;
+  --orange:#F47920;--dark:#1A1A1A;--r8:8px;--r12:12px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1A1A1A;--bg2:#222;--bgD:#501313;--bgW:#2e1a00;--bgS:#173404;
+  --tx:#f0ede8;--tx2:#a0a09a;--bd:rgba(255,255,255,.10);--bd2:rgba(255,255,255,.20);
+  --bdD:#791f1f;--bdW:#b85800;--txD:#f09595;--txW:#F47920;--txS:#97c459;
+}}
+body{font-family:var(--font);background:var(--bg2);color:var(--tx);min-height:100vh;}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--dark);}
+.login-box{background:var(--bg);border-radius:16px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.35);}
+.login-logo{text-align:center;margin-bottom:20px;}
+.login-logo img{height:46px;border-radius:6px;}
+.login-title{font-size:16px;font-weight:600;color:var(--tx);text-align:center;margin-bottom:3px;}
+.login-sub{font-size:12px;color:var(--tx2);text-align:center;margin-bottom:22px;}
+.role-tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--bg2);border-radius:var(--r8);padding:4px;}
+.role-tab{flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);background:transparent;color:var(--tx2);transition:all .2s;}
+.role-tab.on{background:var(--orange);color:#fff;}
+.lfield{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.lfield label{font-size:12px;color:var(--tx2);font-weight:500;}
+.lfield input,.lfield select{height:38px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 11px;font-size:13px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);width:100%;}
+.lfield input:focus,.lfield select:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.login-btn{width:100%;height:42px;border-radius:var(--r8);border:none;background:var(--orange);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:4px;transition:filter .15s;}
+.login-btn:hover{filter:brightness(.9);}
+.login-err{background:var(--bgD);color:var(--txD);border:1px solid var(--bdD);border-radius:var(--r8);padding:8px 12px;font-size:12px;margin-bottom:12px;display:none;}
+.app{display:none;min-height:100vh;flex-direction:column;}
+.topbar{background:var(--dark);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.topbar img{height:34px;border-radius:5px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.topbar-user{font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px;}
+.role-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:var(--orange);color:#fff;}
+.role-badge.agent{background:#555;}
+.logout-btn{height:28px;padding:0 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;font-family:var(--font);}
+.logout-btn:hover{background:rgba(255,255,255,.1);}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--orange);animation:pulse 1.4s infinite;flex-shrink:0;}
+.pulse.grey{background:#888;animation:none;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.35)}}
+#clock{font-size:11px;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums;}
+.sync-status{font-size:10px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:4px;}
+.siren{display:none;align-items:center;gap:10px;background:var(--bgD);border-bottom:1px solid var(--bdD);padding:.6rem 1.2rem;font-size:13px;font-weight:500;color:var(--txD);}
+.siren.on{display:flex;}
+.mute-btn{margin-left:auto;height:28px;padding:0 10px;border-radius:var(--r8);border:1px solid var(--bdD);background:transparent;color:var(--txD);font-size:12px;cursor:pointer;font-family:var(--font);}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd);padding:0 20px;background:var(--bg);overflow-x:auto;}
+.tab{padding:10px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--tx2);font-family:var(--font);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.tab.on{color:var(--tx);border-bottom-color:var(--orange);font-weight:500;}
+.tab:hover{color:var(--tx);}
+.panel{display:none;padding:20px;}
+.panel.on{display:block;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:9px;margin-bottom:1.2rem;}
+.stat{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r8);padding:.75rem 1rem;}
+.stat-lbl{font-size:11px;color:var(--tx2);margin-bottom:3px;}
+.stat-val{font-size:22px;font-weight:500;color:var(--tx);}
+.stat-val.red{color:var(--txD);}
+.stat-val.grn{color:var(--txS);}
+.bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.bh-title{font-size:13px;font-weight:500;color:var(--tx2);}
+.bh-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.clr-btn{font-size:12px;color:var(--tx2);border:none;background:none;cursor:pointer;font-family:var(--font);}
+.clr-btn:hover{color:var(--txD);}
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.filter-bar select{height:30px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 8px;font-size:12px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);}
+.board{display:flex;flex-direction:column;gap:8px;}
+.card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:.85rem 1rem;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;transition:border-color .3s,background .3s;}
+.card.urgent{border-color:var(--bdD);background:var(--bgD);animation:shake .3s infinite alternate;}
+@keyframes shake{from{transform:translateX(0)}to{transform:translateX(4px)}}
+.card.warned{border-color:#FAC775;}
+.card.done{opacity:.4;}
+.card.handover{border-left:3px solid #7dc456;}
+.ring-wrap{width:52px;height:52px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+.ring-wrap svg{position:absolute;top:0;left:0;}
+.ring-inner{z-index:1;text-align:center;}
+.ring-cd{font-size:10px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;}
+.ring-sub{font-size:8px;color:var(--tx2);text-transform:uppercase;letter-spacing:.03em;}
+.cinfo{flex:1;min-width:180px;}
+.cref-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;}
+.cref{font-size:14px;font-weight:500;color:var(--tx);}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.badge.rst{background:var(--bgW);color:var(--txW);}
+.badge.ho{background:#eaf3de;color:#2d6a0a;border:1px solid #7dc456;}
+.csub{font-size:12px;color:var(--tx2);margin-bottom:4px;}
+.bar-lbls{display:flex;justify-content:space-between;margin-bottom:3px;}
+.bar-lbl{font-size:11px;color:var(--tx2);font-variant-numeric:tabular-nums;}
+.bar-lbl.r{font-weight:500;}
+.bar-bg{background:var(--bd);border-radius:4px;height:5px;overflow:hidden;}
+.bar-fill{height:5px;border-radius:4px;}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.cstatus{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.s-active{background:var(--bgW);color:var(--txW);}
+.s-urgent{background:var(--bgD);color:var(--txD);}
+.s-warned{background:#faeeda;color:#854f0b;}
+.s-done{background:var(--bg2);color:var(--tx2);}
+.cactions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.btn{height:30px;padding:0 11px;border-radius:var(--r8);border:1px solid var(--bd2);background:var(--bg);color:var(--tx2);font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-family:var(--font);}
+.btn:hover{background:var(--bg2);}
+.btn.warn{border-color:#FAC775;background:#faeeda;color:#854f0b;}
+.btn.ho-btn{border-color:#7dc456;background:#eaf3de;color:#2d6a0a;}
+.btn.ho-btn:hover{filter:brightness(.92);}
+.btn.primary{height:36px;padding:0 16px;font-size:13px;background:var(--orange);color:#fff;border-color:var(--orange);}
+.btn.primary:hover{filter:brightness(.9);}
+.form{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;margin-bottom:1.2rem;display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap;}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:125px;}
+.field label{font-size:11px;color:var(--tx2);font-weight:500;}
+.field input,.field select{border:1px solid var(--bd2);border-radius:var(--r8);padding:0 9px;font-size:13px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);height:34px;}
+.field input:focus,.field select:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-ov.on{display:flex;}
+.modal{background:var(--bg);border-radius:var(--r12);padding:28px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.modal-title{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--tx2);margin-bottom:16px;line-height:1.6;}
+.modal-ref{background:var(--bgW);border:1px solid var(--bdW);border-radius:var(--r8);padding:8px 12px;font-size:13px;font-weight:500;color:var(--txW);margin-bottom:10px;}
+.modal-note{background:#eaf3de;border:1px solid #7dc456;border-radius:var(--r8);padding:8px 12px;font-size:11px;color:#2d6a0a;margin-bottom:16px;}
+.modal-field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+.modal-field label{font-size:12px;color:var(--tx2);font-weight:500;}
+.modal-field select{height:38px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 11px;font-size:13px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);width:100%;}
+.modal-field select:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.modal-cancel{height:36px;padding:0 16px;border-radius:var(--r8);border:1px solid var(--bd2);background:var(--bg);color:var(--tx2);font-size:13px;cursor:pointer;font-family:var(--font);}
+.modal-cancel:hover{background:var(--bg2);}
+.modal-confirm{height:36px;padding:0 16px;border-radius:var(--r8);border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);}
+.modal-confirm:hover{filter:brightness(.9);}
+.admin-sec{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;margin-bottom:1rem;}
+.admin-sec h3{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd);}
+.atable{width:100%;border-collapse:collapse;font-size:12px;}
+.atable th{text-align:left;font-weight:500;color:var(--tx2);padding:6px 10px;border-bottom:1px solid var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+.atable td{padding:8px 10px;border-bottom:1px solid var(--bd);color:var(--tx);}
+.atable tr:last-child td{border-bottom:none;}
+.atable tr:hover td{background:var(--bg2);}
+.add-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.add-row input{flex:1;min-width:110px;height:32px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 9px;font-size:12px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);}
+.add-row input:focus{border-color:var(--orange);}
+.sm-btn{height:32px;padding:0 12px;border-radius:var(--r8);border:1px solid var(--bd2);background:var(--bg);color:var(--tx);font-size:12px;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+.sm-btn.o{background:var(--orange);color:#fff;border-color:var(--orange);}
+.sm-btn:hover{background:var(--bg2);}
+.sm-btn.o:hover{filter:brightness(.9);}
+.del{height:24px;padding:0 8px;border-radius:5px;border:1px solid var(--bdD);background:transparent;color:var(--txD);font-size:11px;cursor:pointer;font-family:var(--font);}
+.del:hover{background:var(--bgD);}
+.pbox{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1.1rem;margin-bottom:1rem;}
+.pbox-title{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px;}
+.pbox-desc{font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.6;}
+.pbox textarea{width:100%;min-height:130px;border:1px solid var(--bd2);border-radius:var(--r8);padding:8px 10px;font-size:12px;font-family:monospace;background:var(--bg);color:var(--tx);outline:none;resize:vertical;}
+.pbox textarea:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.parse-ok{background:var(--bgS);color:var(--txS);border:1px solid #7dc456;border-radius:var(--r8);padding:7px 11px;font-size:12px;margin-top:9px;display:none;}
+.parse-err{background:var(--bgD);color:var(--txD);border:1px solid var(--bdD);border-radius:var(--r8);padding:7px 11px;font-size:12px;margin-top:9px;display:none;}
+.guide-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1.1rem;margin-bottom:1rem;}
+.gstep{display:flex;gap:12px;margin-bottom:1rem;}
+.gstep:last-child{margin-bottom:0;}
+.gnum{width:26px;height:26px;border-radius:50%;background:var(--bgW);color:var(--txW);border:1px solid var(--bdW);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gbody .gtitle{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px;}
+.gbody .gdesc{font-size:12px;color:var(--tx2);line-height:1.7;}
+.gbody .gdesc code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px;color:var(--tx);}
+.fmap{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.fmap th{text-align:left;font-weight:500;color:var(--tx2);padding:5px 8px;border-bottom:1px solid var(--bd);}
+.fmap td{padding:5px 8px;border-bottom:1px solid var(--bd);color:var(--tx);}
+.fmap td code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:10px;}
+.fmap tr:last-child td{border-bottom:none;}
+.win-row{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;}
+.win-input{width:70px;height:34px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 8px;font-size:13px;background:var(--bg);color:var(--tx);font-family:var(--font);outline:none;}
+.win-input:focus{border-color:var(--orange);}
+.empty{text-align:center;padding:2.5rem;color:var(--tx2);font-size:14px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:1rem;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2);}
+.ldot{width:8px;height:8px;border-radius:50%;}
+.footer{text-align:center;font-size:11px;color:var(--tx2);padding:20px;}
+.connecting-overlay{position:fixed;inset:0;background:rgba(26,26,26,.92);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.connecting-spinner{width:36px;height:36px;border:3px solid rgba(244,121,32,.3);border-top-color:var(--orange);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.connecting-text{color:#fff;font-size:14px;font-weight:500;}
+.connecting-sub{color:rgba(255,255,255,.5);font-size:12px;}
+.tow-board{display:flex;flex-direction:column;gap:8px;}
+.tow-form{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;margin-bottom:1.2rem;display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap;}
+.tow-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:.85rem 1rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;transition:border-color .3s;}
+.tow-card.critical{border-color:var(--bdD);background:var(--bgD);}
+.tow-card.warning{border-color:#FAC775;background:#faeeda;}
+.tow-card.confirmed{opacity:.4;}
+.tow-hours{width:60px;height:60px;border-radius:50%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--orange);position:relative;}
+.tow-hours.critical{border-color:#E24B4A;}
+.tow-hours.warning{border-color:#EF9F27;}
+.tow-hours.confirmed{border-color:#aaa;}
+.tow-hour-val{font-size:14px;font-weight:700;color:var(--tx);line-height:1;}
+.tow-hour-lbl{font-size:8px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;}
+.tow-info{flex:1;min-width:160px;}
+.tow-ref{font-size:14px;font-weight:500;color:var(--tx);margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.tow-sub{font-size:12px;color:var(--tx2);}
+.tow-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.tow-status{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.ts-open{background:#fff4e5;color:#b85800;}
+.ts-critical{background:var(--bgD);color:var(--txD);}
+.ts-warning{background:#faeeda;color:#854f0b;}
+.ts-confirmed{background:var(--bgS);color:var(--txS);}
+.tow-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;background:var(--bgD);color:var(--txD);border:1px solid var(--bdD);}
+.tow-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:9px;margin-bottom:1.2rem;}
+.tow-confirm-btn{height:30px;padding:0 11px;border-radius:var(--r8);border:1px solid #7dc456;background:#eaf3de;color:#2d6a0a;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-family:var(--font);}
+.tow-confirm-btn:hover{filter:brightness(.92);}
+.tow-del-btn{height:30px;padding:0 11px;border-radius:var(--r8);border:1px solid var(--bdD);background:transparent;color:var(--txD);font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;font-family:var(--font);}
+.tow-del-btn:hover{background:var(--bgD);}
+.tow-bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.tow-bh-title{font-size:13px;font-weight:500;color:var(--tx2);}
+.tow-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:1rem;}
+.ins-section{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;margin-bottom:1.2rem;}
+.ins-section-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.ins-date-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;}
+.ins-date-label{font-size:12px;color:var(--tx2);font-weight:500;}
+.ins-date-input{height:32px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 9px;font-size:12px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);}
+.ins-date-input:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.ins-apply-btn{height:32px;padding:0 14px;border-radius:var(--r8);border:none;background:var(--orange);color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);}
+.ins-apply-btn:hover{filter:brightness(.9);}
+.ins-export-btn{height:32px;padding:0 14px;border-radius:var(--r8);border:1px solid var(--bd2);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;margin-left:auto;}
+.ins-export-btn:hover{background:var(--bg2);}
+.ins-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.2rem;}
+.ins-kpi{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem;text-align:center;}
+.ins-kpi-val{font-size:28px;font-weight:600;color:var(--orange);margin-bottom:4px;}
+.ins-kpi-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;}
+.ins-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ins-table th{text-align:left;font-weight:500;color:var(--tx2);padding:7px 10px;border-bottom:1px solid var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.ins-table td{padding:8px 10px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;}
+.ins-table tr:last-child td{border-bottom:none;}
+.ins-table tr:hover td{background:var(--bg2);}
+.ins-bar-wrap{display:flex;align-items:center;gap:8px;}
+.ins-bar-bg{flex:1;background:var(--bd);border-radius:4px;height:8px;overflow:hidden;min-width:60px;}
+.ins-bar-fill{height:8px;border-radius:4px;background:var(--orange);}
+.ins-bar-fill.green{background:var(--txS);}
+.ins-bar-fill.red{background:var(--txD);}
+.ins-bar-fill.amber{background:#EF9F27;}
+.ins-val{font-size:12px;font-weight:500;color:var(--tx);white-space:nowrap;}
+.ins-agent-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bgW);color:var(--txW);font-weight:500;}
+.ins-rank{font-size:11px;font-weight:700;color:var(--tx2);width:20px;}
+.ins-chart-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:4px;}
+.ins-bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.ins-bar-col-bar{width:100%;background:var(--orange);border-radius:4px 4px 0 0;min-height:4px;transition:height .3s;}
+.ins-bar-col-lbl{font-size:9px;color:var(--tx2);text-align:center;white-space:nowrap;}
+.ins-bar-col-val{font-size:9px;font-weight:600;color:var(--tx);}
+.ins-empty{text-align:center;padding:2rem;color:var(--tx2);font-size:13px;}
+.ho-summary{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r12);padding:1rem 1.1rem;margin-top:1.2rem;}
+.ho-summary-title{font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.ho-summary-title span{background:var(--bgW);color:var(--txW);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.ho-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ho-table th{text-align:left;font-weight:500;color:var(--tx2);padding:6px 10px;border-bottom:1px solid var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+.ho-table td{padding:8px 10px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;}
+.ho-table tr:last-child td{border-bottom:none;}
+.ho-table tr:hover td{background:var(--bg2);}
+.ho-badge-from{font-size:10px;padding:2px 7px;border-radius:20px;background:#faeeda;color:#854f0b;font-weight:500;white-space:nowrap;}
+.ho-badge-to{font-size:10px;padding:2px 7px;border-radius:20px;background:#eaf3de;color:#2d6a0a;font-weight:500;white-space:nowrap;border:1px solid #7dc456;}
+.ho-time{font-size:11px;color:var(--tx2);}
+.ho-ref{font-weight:500;color:var(--tx);}
+.ho-empty{text-align:center;padding:1.5rem;color:var(--tx2);font-size:12px;}
+.ho-filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bd);}
+.ho-filter-label{font-size:12px;color:var(--tx2);font-weight:500;}
+.ho-date-input{height:30px;border:1px solid var(--bd2);border-radius:var(--r8);padding:0 9px;font-size:12px;background:var(--bg);color:var(--tx);outline:none;font-family:var(--font);}
+.ho-date-input:focus{box-shadow:0 0 0 2px rgba(244,121,32,.3);border-color:var(--orange);}
+.ho-filter-btn{height:30px;padding:0 12px;border-radius:var(--r8);border:1px solid var(--bd2);background:var(--bg);color:var(--tx2);font-size:12px;cursor:pointer;font-family:var(--font);}
+.ho-filter-btn:hover{background:var(--bg2);}
+.ho-filter-btn.o{background:var(--orange);color:#fff;border-color:var(--orange);}
+.ho-filter-btn.o:hover{filter:brightness(.9);}
+.case-history-btn{height:24px;padding:0 8px;border-radius:5px;border:1px solid var(--bd2);background:var(--bg);color:var(--txI, #185fa5);font-size:10px;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+.case-history-btn:hover{background:var(--bg2);}
+.report-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.report-modal-ov.on{display:flex;}
+.report-modal{background:var(--bg);border-radius:var(--r12);padding:24px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.report-modal-title{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:4px;}
+.report-modal-ref{font-size:12px;color:var(--tx2);margin-bottom:16px;}
+.report-section{margin-bottom:16px;}
+.report-section-title{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bd);}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;}
+.report-row:last-child{border-bottom:none;}
+.report-label{color:var(--tx2);}
+.report-value{color:var(--tx);font-weight:500;text-align:right;}
+.report-timeline{display:flex;flex-direction:column;gap:6px;}
+.timeline-item{display:flex;gap:10px;align-items:flex-start;font-size:12px;}
+.timeline-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.timeline-text{color:var(--tx2);flex:1;line-height:1.5;}
+.timeline-text strong{color:var(--tx);}
+.report-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--bd);}
+</style>
+</head>
+<body>
+<!-- CONNECTING OVERLAY -->
+<div class="connecting-overlay" id="connectingOverlay">
+  <div class="connecting-spinner"></div>
+  <div class="connecting-text">Connecting to Firebase...</div>
+  <div class="connecting-sub">Setting up real-time sync</div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo"><img src="data:image/png;base64,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" alt="Firstassist"/></div>
+    <div class="login-title">HCV Live Cases</div>
+    <div class="login-sub">Select your role to continue</div>
+    <div class="role-tabs">
+      <button class="role-tab on" onclick="setRole('agent')" id="rtAgent">Agent</button>
+      <button class="role-tab" onclick="setRole('admin')" id="rtAdmin">Administrator</button>
+    </div>
+    <div id="loginErr" class="login-err"></div>
+    <div id="agentLogin">
+      <div class="lfield"><label>Select your name</label>
+        <select id="agentSel"><option value="">— Select your name —</option></select>
+      </div>
+      <button class="login-btn" onclick="loginAgent()">Enter Dashboard</button>
+    </div>
+    <div id="adminLogin" style="display:none">
+      <div class="lfield"><label>Username</label><input type="text" id="adminUser" placeholder="Enter username" autocomplete="off"/></div>
+      <div class="lfield"><label>Password</label><input type="password" id="adminPass" placeholder="Enter password"/></div>
+      <button class="login-btn" onclick="loginAdmin()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- HANDOVER MODAL -->
+<div class="modal-ov" id="hoModal">
+  <div class="modal">
+    <div class="modal-title">&#128260; Hand Over Case</div>
+    <div class="modal-sub">Select the agent on the incoming shift who will take over this case.</div>
+    <div class="modal-ref" id="hoRef">—</div>
+    <div class="modal-note">&#8505; The countdown timer continues running — it does not reset on handover. The receiving agent should follow up immediately if time is short.</div>
+    <div class="modal-field"><label>Hand over to</label>
+      <select id="hoSel"><option value="">— Select incoming agent —</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeHO()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmHO()">Confirm Handover</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <img src="data:image/png;base64,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" alt="Firstassist"/>
+    <div class="topbar-right">
+      <div class="sync-status" id="syncStatus"><div class="pulse grey" id="syncDot"></div><span id="syncTxt">Connecting...</span></div>
+      <span id="clock"></span>
+      <div class="topbar-user"><span id="topName"></span><span class="role-badge" id="topBadge">Admin</span></div>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="siren" id="siren">
+    &#9888;&#65039; <span id="sirenTxt">Overdue!</span>
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()" style="display:none">&#128263; Mute</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="go('board')">&#9634; Live Board</button>
+    <button class="tab" onclick="go('manual')">&#43; Manual Entry</button>
+    <button class="tab" onclick="go('auto')" id="tabAuto" style="display:none">&#9889; Auto Import</button>
+    <button class="tab" onclick="go('guide')" id="tabGuide" style="display:none">&#128196; Setup Guide</button>
+    <button class="tab" onclick="go('admin-panel')" id="tabAdmin" style="display:none">&#9881; Admin Panel</button>
+    <button class="tab" onclick="go('insights')" id="tabInsights" style="display:none">&#128202; Insights</button>
+    <button class="tab" onclick="go('tow')">&#128666; Tow Tracker</button>
+  </div>
+
+  <!-- BOARD -->
+  <div id="p-board" class="panel on">
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">Total today</div><div class="stat-val" id="sTotal">0</div></div>
+      <div class="stat"><div class="stat-lbl">Active</div><div class="stat-val" id="sActive">0</div></div>
+      <div class="stat"><div class="stat-lbl">Overdue</div><div class="stat-val red" id="sOver">0</div></div>
+      <div class="stat"><div class="stat-lbl">Acknowledged</div><div class="stat-val grn" id="sDone">0</div></div>
+    </div>
+    <div class="bh">
+      <span class="bh-title" id="boardTitle">Live case board</span>
+      <div class="bh-right">
+        <div class="filter-bar" id="adminFilter" style="display:none">
+          <span style="font-size:12px;color:var(--tx2)">Filter:</span>
+          <select id="fAgent" onchange="fullRender()"><option value="all">All agents</option></select>
+          <select id="fStatus" onchange="fullRender()">
+            <option value="all">Active &amp; Overdue</option>
+            <option value="active">Active</option>
+            <option value="overdue">Overdue</option>
+            <option value="done">Acknowledged</option>
+          </select>
+        </div>
+        <button class="clr-btn" onclick="clearDone()">Clear acknowledged</button>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="legend">
+      <div class="leg"><div class="ldot" style="background:var(--orange)"></div>Active</div>
+      <div class="leg"><div class="ldot" style="background:#EF9F27"></div>Warning (&le;15 min)</div>
+      <div class="leg"><div class="ldot" style="background:#E24B4A"></div>Overdue</div>
+      <div class="leg"><div class="ldot" style="background:#aaa"></div>Acknowledged</div>
+      <div class="leg"><div class="ldot" style="background:#7dc456;border:2px solid #3a7d0a"></div>Handover</div>
+    </div>
+
+    <!-- HANDOVER SUMMARY -->
+    <div class="ho-summary">
+      <div class="ho-summary-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">&#128260; Handover Log <span id="hoCount">0</span></div>
+        <button class="btn" id="exportHoBtn" onclick="exportHandoverExcel()" style="display:none;font-size:11px;height:28px;padding:0 10px;gap:4px;">&#128190; Export to Excel</button>
+      </div>
+      <div class="ho-filters">
+        <span class="ho-filter-label">Date range:</span>
+        <input type="date" id="hoDateFrom" class="ho-date-input" onchange="renderHandoverSummary()" title="From date"/>
+        <span style="font-size:12px;color:var(--tx2)">to</span>
+        <input type="date" id="hoDateTo" class="ho-date-input" onchange="renderHandoverSummary()" title="To date"/>
+        <button class="ho-filter-btn o" onclick="applyHoDateFilter()">Apply</button>
+        <button class="ho-filter-btn" onclick="clearHoDateFilter()">Clear</button>
+      </div>
+      <table class="ho-table">
+        <thead>
+          <tr>
+            <th>Case Ref</th>
+            <th>Insurance</th>
+            <th>Handed from</th>
+            <th>Handed to</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="hoTableBody">
+          <tr><td colspan="6" class="ho-empty">No handovers recorded yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MANUAL ENTRY -->
+  <div id="p-manual" class="panel">
+    <div class="form">
+      <div class="field"><label>Case / ref number</label><input id="mRef" placeholder="e.g. C04F2WH"/></div>
+      <div class="field"><label>Insurance name</label><input id="mIns" placeholder="e.g. Western National"/></div>
+      <div class="field"><label>Licence plate</label><input id="mPlate" placeholder="e.g. CAA463989"/></div>
+      <div class="field" style="max-width:120px"><label>Window (min)</label><input type="number" id="mWin" value="30" min="1" max="180"/></div>
+      <button class="btn primary" onclick="logManual()">&#43; Log FNOL</button>
+    </div>
+  </div>
+
+  <!-- AUTO IMPORT -->
+  <div id="p-auto" class="panel">
+    <div class="pbox">
+      <div class="pbox-title">&#9889; Paste FNOL email to import</div>
+      <div class="pbox-desc">Paste the full FNOL email body below. The parser will extract all fields and load the case onto the board — synced to all users instantly.</div>
+      <textarea id="fnolPaste" placeholder="Paste FNOL email here..."></textarea>
+      <div class="win-row">
+        <button class="btn primary" onclick="parseAndLoad()">&#9889; Parse &amp; load case</button>
+        <input type="number" id="aWin" value="30" min="1" max="180" class="win-input"/>
+        <span style="font-size:11px;color:var(--tx2)">min window</span>
+      </div>
+      <div id="parseOk" class="parse-ok"></div>
+      <div id="parseErr" class="parse-err"></div>
+    </div>
+  </div>
+
+  <!-- SETUP GUIDE -->
+  <div id="p-guide" class="panel">
+    <div class="guide-box">
+      <div class="gstep"><div class="gnum">1</div><div class="gbody"><div class="gtitle">&#10003; Dashboard is live</div><div class="gdesc">Your dashboard is hosted at <code>https://silentcaffeine.github.io/hcv-live-cases/</code> and synced to Firebase in real time. Share this URL with all agents and administrators — bookmark it or pin it as a Teams tab.</div></div></div>
+      <div class="gstep"><div class="gnum">2</div><div class="gbody"><div class="gtitle">Power Automate — Flow 1 (FNOL Parser)</div><div class="gdesc">Import <code>Flow1_FNOL_Parser.json</code> into Power Automate. Connect your FNOL inbox. Set the monitoring mailbox to <code>hcv.fnol@firstassist.co.za</code>.</div></div></div>
+      <div class="gstep"><div class="gnum">3</div><div class="gbody"><div class="gtitle">Power Automate — Flow 2 (Push to Dashboard)</div><div class="gdesc">Import <code>Flow2_Summary_To_Dashboard.json</code>. The webhook endpoint is already set to <code>https://silentcaffeine.github.io/hcv-live-cases/</code>. Use the Auto Import tab to load FNOL emails manually until Power Automate is fully connected.</div></div></div>
+      <div class="gstep"><div class="gnum">4</div><div class="gbody"><div class="gtitle">Field mapping</div>
+        <table class="fmap">
+          <tr><th>Dashboard field</th><th>From FNOL email</th></tr>
+          <tr><td>Case ref</td><td><code>Case Reference: C04F2WH</code></td></tr>
+          <tr><td>Insurance</td><td><code>Dear Western National -</code></td></tr>
+          <tr><td>Licence plate</td><td><code>License Plate Number: CAA463989</code></td></tr>
+          <tr><td>Customer</td><td><code>Customer Name: ...</code></td></tr>
+          <tr><td>Pickup</td><td><code>Pick Up: ...</code></td></tr>
+          <tr><td>Destination</td><td><code>Destination Name: ...</code></td></tr>
+        </table>
+      </div></div></div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="p-admin-panel" class="panel">
+    <div class="admin-sec">
+      <h3>&#128101; Manage Agents</h3>
+      <table class="atable"><thead><tr><th>#</th><th>Agent Name</th><th>Cases</th><th>Overdue</th><th>Action</th></tr></thead>
+        <tbody id="agentTbody"></tbody>
+      </table>
+      <div class="add-row"><input id="newAgent" placeholder="New agent full name..."/><button class="sm-btn o" onclick="addAgent()">+ Add Agent</button></div>
+    </div>
+    <div class="admin-sec">
+      <h3>&#128274; Manage Administrator Accounts</h3>
+      <table class="atable"><thead><tr><th>#</th><th>Username</th><th>Display Name</th><th>Action</th></tr></thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+      <div class="add-row">
+        <input id="newAdmUser" placeholder="Username..."/>
+        <input id="newAdmDisp" placeholder="Display name..."/>
+        <input id="newAdmPass" type="password" placeholder="Password..."/>
+        <button class="sm-btn o" onclick="addAdmin()">+ Add Admin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOW TRACKER -->
+  <div id="p-tow" class="panel">
+    <div class="tow-form">
+      <div class="field"><label>Case / ref number</label><input id="tRef" placeholder="e.g. C04F2WH"/></div>
+      <div class="field"><label>Insurance name</label><input id="tIns" placeholder="e.g. Western National"/></div>
+      <button class="btn primary" onclick="logTow()">&#128666; Log Tow Case</button>
+    </div>
+    <div class="tow-stats">
+      <div class="stat"><div class="stat-lbl">Total open</div><div class="stat-val" id="tTotal">0</div></div>
+      <div class="stat"><div class="stat-lbl">Under 24hrs</div><div class="stat-val" id="tUnder24">0</div></div>
+      <div class="stat"><div class="stat-lbl">24 - 48hrs</div><div class="stat-val red" id="t2448">0</div></div>
+      <div class="stat"><div class="stat-lbl">Over 48hrs</div><div class="stat-val red" id="tOver48">0</div></div>
+      <div class="stat"><div class="stat-lbl">Confirmed</div><div class="stat-val grn" id="tConfirmed">0</div></div>
+    </div>
+    <div class="tow-bh">
+      <span class="tow-bh-title">Open tow cases — awaiting drop-off confirmation</span>
+      <button class="clr-btn" onclick="clearConfirmedTows()">Clear confirmed</button>
+    </div>
+    <div class="tow-board" id="towBoard"></div>
+    <div class="tow-legend">
+      <div class="leg"><div class="ldot" style="background:var(--orange)"></div> Under 24hrs</div>
+      <div class="leg"><div class="ldot" style="background:#EF9F27"></div> 24 - 48hrs (Warning)</div>
+      <div class="leg"><div class="ldot" style="background:#E24B4A"></div> Over 48hrs (Critical)</div>
+      <div class="leg"><div class="ldot" style="background:#aaa"></div> Drop-off confirmed</div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div id="p-insights" class="panel">
+
+    <!-- Date Range -->
+    <div class="ins-date-row">
+      <span class="ins-date-label">Date range:</span>
+      <input type="date" id="insFrom" class="ins-date-input"/>
+      <span style="font-size:12px;color:var(--tx2)">to</span>
+      <input type="date" id="insTo" class="ins-date-input"/>
+      <button class="ins-apply-btn" onclick="buildInsights()">&#128202; Apply</button>
+      <button class="ins-export-btn" onclick="exportInsightsExcel()">&#128190; Export to Excel</button>
+    </div>
+
+    <!-- KPI Summary -->
+    <div class="ins-kpi-grid" id="insKpiGrid">
+      <div class="ins-kpi"><div class="ins-kpi-val" id="kpiTotal">—</div><div class="ins-kpi-lbl">Total Cases</div></div>
+      <div class="ins-kpi"><div class="ins-kpi-val" id="kpiAcked">—</div><div class="ins-kpi-lbl">Acknowledged</div></div>
+      <div class="ins-kpi"><div class="ins-kpi-val" id="kpiAvgAck" style="color:var(--txW)">—</div><div class="ins-kpi-lbl">Avg Siren→Ack Time</div></div>
+      <div class="ins-kpi"><div class="ins-kpi-val" id="kpiResets" style="color:var(--txD)">—</div><div class="ins-kpi-lbl">Total Resets</div></div>
+      <div class="ins-kpi"><div class="ins-kpi-val" id="kpiHandovers" style="color:#7dc456">—</div><div class="ins-kpi-lbl">Total Handovers</div></div>
+    </div>
+
+    <!-- Daily Case Volume Chart -->
+    <div class="ins-section">
+      <div class="ins-section-title">&#128200; Daily Case Volume</div>
+      <div id="insVolumeChart" class="ins-chart-wrap"></div>
+    </div>
+
+    <!-- Agent Performance Table -->
+    <div class="ins-section">
+      <div class="ins-section-title">&#128101; Agent Performance</div>
+      <table class="ins-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Agent</th>
+            <th>Cases Logged</th>
+            <th>Acknowledged</th>
+            <th>Avg Siren&#8594;Ack</th>
+            <th>Resets</th>
+            <th>Handovers Given</th>
+            <th>Handovers Received</th>
+          </tr>
+        </thead>
+        <tbody id="insAgentTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Siren Response Time -->
+    <div class="ins-section">
+      <div class="ins-section-title">&#128680; Siren Response Time — per agent</div>
+      <div id="insSirenTable">
+        <div class="ins-empty">Apply a date range to see siren response data.</div>
+      </div>
+    </div>
+
+    <!-- Reset Analysis -->
+    <div class="ins-section">
+      <div class="ins-section-title">&#8635; Cases Reset Most Often</div>
+      <table class="ins-table" id="insResetTable">
+        <thead><tr><th>#</th><th>Case Ref</th><th>Insurance</th><th>Agent</th><th>Times Reset</th><th>Date Logged</th></tr></thead>
+        <tbody id="insResetBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">HCV Operations &middot; Internal use only</div>
+</div>
+
+<!-- CASE HISTORY REPORT MODAL -->
+<div class="report-modal-ov" id="reportModal">
+  <div class="report-modal">
+    <div class="report-modal-title">&#128203; Case History Report</div>
+    <div class="report-modal-ref" id="reportRef">—</div>
+    <div id="reportContent"></div>
+    <div class="report-modal-btns">
+      <button class="btn" id="reportExportBtn" onclick="exportCaseReportExcel()" style="gap:4px;">&#128190; Export to Excel</button>
+      <button class="btn primary" onclick="closeReport()">Close</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+// ══ FIREBASE ══════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, onValue, set, remove, push, update } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+const firebaseConfig = {"apiKey": "AIzaSyAuAYz-RSxVMe-qhkfCK-jwneCNgztm31c", "authDomain": "firstassist-hcv.firebaseapp.com", "databaseURL": "https://firstassist-hcv-default-rtdb.firebaseio.com", "projectId": "firstassist-hcv", "storageBucket": "firstassist-hcv.firebasestorage.app", "messagingSenderId": "692676413551", "appId": "1:692676413551:web:6b65cc336602570208659a"};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+// ══ APP STATE ══════════════════════════════════════════
+let cases = {};  // keyed by Firebase push ID
+let currentUser = null;
+let pendingHO = null;
+let muted = false, sirenOn = false, sirenTick = null, buzzPhase = false;
+let AGENTS = ["Busisiwe Modubu", "Prince Nxumalo", "Alessandro Jaarts", "Fazlin Rasdien", "Juliet Komane", "Lethukhanya Mtolo", "Dineo Scarf", "Katlego Sefularo", "Given Skhosana", "Pherushca Evans", "Naffisa Phipps", "Beverly Mothata", "Kebarileng Tlhara"];
+let ADMINS = [{"user": "thabiso", "pass": "Firstassist@1", "display": "Thabiso Modise"}, {"user": "xolani", "pass": "Firstassist@1", "display": "Xolani Tshabalala"}, {"user": "preshalin", "pass": "Firstassist@1", "display": "Preshalin Naidoo"}, {"user": "eunice", "pass": "Firstassist@1", "display": "Eunice Moumakwa"}];
+
+// ══ SYNC STATUS ════════════════════════════════════════
+function setSyncStatus(connected) {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncTxt');
+  if(connected) {
+    dot.className = 'pulse';
+    txt.textContent = 'Live sync active';
+  } else {
+    dot.className = 'pulse grey';
+    txt.textContent = 'Reconnecting...';
+  }
+}
+
+// ══ FIREBASE LISTENERS ════════════════════════════════
+function startListening() {
+  // Listen to connection state
+  const connRef = ref(db, '.info/connected');
+  onValue(connRef, snap => setSyncStatus(snap.val() === true));
+
+  // Listen to all cases in real time
+  const casesRef = ref(db, 'cases');
+  onValue(casesRef, snap => {
+    cases = snap.val() || {};
+    fullRender();
+    checkSiren();
+  });
+
+  // Listen to agents/admins config
+  const configRef = ref(db, 'config');
+  onValue(configRef, snap => {
+    const cfg = snap.val();
+    if(cfg) {
+      if(cfg.agents && cfg.agents.length) AGENTS = cfg.agents;
+      if(cfg.admins && cfg.admins.length) ADMINS = cfg.admins;
+    }
+    // Always populate dropdowns whether or not Firebase has a config node yet
+    populateDDs();
+  });
+}
+
+// ══ WRITE HELPERS ══════════════════════════════════════
+function saveConfig() {
+  set(ref(db, 'config'), { agents: AGENTS, admins: ADMINS });
+}
+
+function saveCase(id, data) {
+  set(ref(db, 'cases/' + id), data);
+}
+
+function updateCase(id, data) {
+  update(ref(db, 'cases/' + id), data);
+}
+
+function deleteCase(id) {
+  remove(ref(db, 'cases/' + id));
+}
+
+function pushCase(data) {
+  return push(ref(db, 'cases'), data);
+}
+
+// ══ LOGIN ══════════════════════════════════════════════
+function setRole(r) {
+  document.getElementById('rtAgent').classList.toggle('on', r==='agent');
+  document.getElementById('rtAdmin').classList.toggle('on', r==='admin');
+  document.getElementById('agentLogin').style.display = r==='agent'?'block':'none';
+  document.getElementById('adminLogin').style.display = r==='admin'?'block':'none';
+  document.getElementById('loginErr').style.display = 'none';
+}
+window.setRole = setRole;
+
+function showErr(m) { const e=document.getElementById('loginErr'); e.textContent=m; e.style.display='block'; }
+
+function loginAgent() {
+  const n = document.getElementById('agentSel').value;
+  if(!n) { showErr('Please select your name.'); return; }
+  currentUser = {name:n, role:'agent'};
+  enterApp();
+}
+window.loginAgent = loginAgent;
+
+function loginAdmin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const f = ADMINS.find(a => a.user===u && a.pass===p);
+  if(!f) { showErr('Incorrect username or password.'); return; }
+  currentUser = {name:f.display||f.user, role:'admin'};
+  enterApp();
+}
+window.loginAdmin = loginAdmin;
+
+function enterApp() {
+  try{ sessionStorage.setItem('hcv_session', JSON.stringify(currentUser)); }catch(e){}
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('topName').textContent = currentUser.name;
+  const b = document.getElementById('topBadge');
+  b.textContent = currentUser.role==='admin'?'Admin':'Agent';
+  b.className = 'role-badge'+(currentUser.role==='agent'?' agent':'');
+  const isAdmin = currentUser.role==='admin';
+  document.getElementById('tabAdmin').style.display = isAdmin?'block':'none';
+  document.getElementById('tabAuto').style.display = isAdmin?'block':'none';
+  document.getElementById('tabGuide').style.display = isAdmin?'block':'none';
+  document.getElementById('tabInsights').style.display = isAdmin?'block':'none';
+  document.getElementById('adminFilter').style.display = isAdmin?'flex':'none';
+  document.getElementById('boardTitle').textContent = isAdmin?'All cases — live board':'My cases — live board';
+  // Only admins can mute the siren
+  document.getElementById('muteBtn').style.display = isAdmin ? 'flex' : 'none';
+  // Only admins see export buttons
+  const exportHoBtn = document.getElementById('exportHoBtn');
+  if(exportHoBtn) exportHoBtn.style.display = isAdmin ? 'flex' : 'none';
+  const exportAckBtn = document.getElementById('exportAckBtn');
+  if(exportAckBtn) exportAckBtn.style.display = isAdmin ? 'flex' : 'none';
+  // Reset filters
+  const fa=document.getElementById('fAgent'); if(fa) fa.value='all';
+  const fs=document.getElementById('fStatus'); if(fs) fs.value='all';
+  // Set handover date filter to today by default
+  const today = new Date().toISOString().slice(0,10);
+  const hoFrom=document.getElementById('hoDateFrom');
+  const hoTo=document.getElementById('hoDateTo');
+  if(hoFrom) hoFrom.value=today;
+  if(hoTo) hoTo.value=today;
+  // Set insights date range defaults
+  setInsightDefaults();
+  populateDDs();
+  fullRender();
+}
+
+function logout() {
+  try{ sessionStorage.removeItem('hcv_session'); }catch(e){}
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('adminUser').value='';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginErr').style.display='none';
+  stopSiren(); go('board');
+}
+window.logout = logout;
+
+// ══ DROPDOWNS ══════════════════════════════════════════
+function populateDDs() {
+  const as = document.getElementById('agentSel');
+  as.innerHTML = '<option value="">— Select your name —</option>';
+  AGENTS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; as.appendChild(o); });
+  const fa = document.getElementById('fAgent');
+  fa.innerHTML = '<option value="all">All agents</option>';
+  AGENTS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; fa.appendChild(o); });
+  renderAgentTable(); renderAdminTable();
+}
+
+// ══ HANDOVER MODAL ══════════════════════════════════════
+function openHO(id) {
+  const c = cases[id]; if(!c) return;
+  pendingHO = id;
+  document.getElementById('hoRef').textContent = 'Case: '+c.ref+' — '+c.insurance+(c.plate?' ('+c.plate+')':'');
+  const hs = document.getElementById('hoSel');
+  hs.innerHTML = '<option value="">— Select incoming agent —</option>';
+  AGENTS.forEach(a=>{ if(a!==currentUser.name){ const o=document.createElement('option'); o.value=a; o.textContent=a; hs.appendChild(o); } });
+  document.getElementById('hoModal').classList.add('on');
+}
+window.openHO = openHO;
+
+function closeHO() { pendingHO=null; document.getElementById('hoModal').classList.remove('on'); }
+window.closeHO = closeHO;
+
+function confirmHO() {
+  const to = document.getElementById('hoSel').value;
+  if(!to) { alert('Please select an agent to hand over to.'); return; }
+  const c = cases[pendingHO]; if(!c) return;
+  updateCase(pendingHO, { agent:to, prevAgent:c.agent, handover:true, handoverFrom:c.agent, handoverAt:Date.now() });
+  closeHO();
+}
+window.confirmHO = confirmHO;
+
+// ══ ADMIN MANAGEMENT ══════════════════════════════════
+function renderAgentTable() {
+  const tb = document.getElementById('agentTbody'); if(!tb) return;
+  const now = Date.now();
+  const caseList = Object.values(cases);
+  tb.innerHTML = AGENTS.map((a,i) => {
+    const mc = caseList.filter(c=>c.agent===a);
+    const mo = mc.filter(c=>!c.closed&&(now-c.start)>=c.windowMs).length;
+    return `<tr><td>${i+1}</td><td>${a}</td><td>${mc.length}</td>
+      <td style="color:${mo>0?'var(--txD)':'var(--txS)'};font-weight:${mo>0?600:400}">${mo}</td>
+      <td><button class="del" onclick="removeAgent(${i})">Remove</button></td></tr>`;
+  }).join('');
+}
+
+function renderAdminTable() {
+  const tb = document.getElementById('adminTbody'); if(!tb) return;
+  tb.innerHTML = ADMINS.map((a,i)=>`<tr><td>${i+1}</td><td>${a.user}</td><td>${a.display||'—'}</td>
+    <td>${ADMINS.length>1?`<button class="del" onclick="removeAdmin(${i})">Remove</button>`:'<span style="font-size:11px;color:var(--tx2)">Last admin</span>'}</td></tr>`).join('');
+}
+
+function addAgent() {
+  const n = document.getElementById('newAgent').value.trim();
+  if(!n) return;
+  if(AGENTS.includes(n)) { alert('Already exists.'); return; }
+  AGENTS.push(n); document.getElementById('newAgent').value='';
+  saveConfig(); populateDDs();
+}
+window.addAgent = addAgent;
+
+function removeAgent(i) {
+  if(!confirm('Remove "'+AGENTS[i]+'"?')) return;
+  AGENTS.splice(i,1); saveConfig(); populateDDs();
+}
+window.removeAgent = removeAgent;
+
+function addAdmin() {
+  const u=document.getElementById('newAdmUser').value.trim();
+  const d=document.getElementById('newAdmDisp').value.trim();
+  const p=document.getElementById('newAdmPass').value;
+  if(!u||!p) { alert('Enter username and password.'); return; }
+  if(ADMINS.find(a=>a.user===u)) { alert('Username exists.'); return; }
+  ADMINS.push({user:u,pass:p,display:d||u});
+  ['newAdmUser','newAdmDisp','newAdmPass'].forEach(id=>document.getElementById(id).value='');
+  saveConfig(); renderAdminTable();
+}
+window.addAdmin = addAdmin;
+
+function removeAdmin(i) {
+  if(ADMINS.length<=1) return;
+  if(!confirm('Remove "'+ADMINS[i].user+'"?')) return;
+  ADMINS.splice(i,1); saveConfig(); renderAdminTable();
+}
+window.removeAdmin = removeAdmin;
+
+// ══ TABS ═══════════════════════════════════════════════
+function go(n) {
+  ['board','manual','auto','guide','admin-panel','tow','insights'].forEach(id=>document.getElementById('p-'+id).classList.toggle('on',id===n));
+  const ns=['board','manual','auto','guide','admin-panel','tow','insights'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
+}
+window.go = go;
+
+// ══ AUDIO ══════════════════════════════════════════════
+function getCtx() { return window._ac||(window._ac=new(window.AudioContext||window.webkitAudioContext)()); }
+function buzz() {
+  if(!sirenOn||muted) return;
+  const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g); g.connect(c.destination); o.type='square';
+  o.frequency.setValueAtTime(buzzPhase?1040:880,c.currentTime);
+  g.gain.setValueAtTime(.55,c.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);
+  o.start(c.currentTime); o.stop(c.currentTime+.1);
+  buzzPhase=!buzzPhase; sirenTick=setTimeout(buzz,buzzPhase?110:320);
+}
+function startSiren() { if(sirenOn) return; sirenOn=true; buzzPhase=false; buzz(); }
+function stopSiren() { sirenOn=false; clearTimeout(sirenTick); }
+function toggleMute() { muted=!muted; document.getElementById('muteBtn').textContent=muted?'&#128264; Unmute':'&#128263; Mute'; }
+window.toggleMute = toggleMute;
+
+// ══ CASES ══════════════════════════════════════════════
+function logManual() {
+  const ref2 = document.getElementById('mRef').value.trim();
+  if(!ref2) { document.getElementById('mRef').focus(); return; }
+  const now = Date.now();
+  const data = {
+    ref:ref2,
+    insurance:document.getElementById('mIns').value.trim()||'Unknown',
+    agent:currentUser.name,
+    plate:document.getElementById('mPlate').value.trim(),
+    windowMs:(parseInt(document.getElementById('mWin').value)||30)*60000,
+    start:now, loggedAt:now,
+    closed:false, resets:0,
+    handover:false, prevAgent:null, handoverFrom:null, handoverAt:null
+  };
+  pushCase(data);
+  ['mRef','mIns','mPlate'].forEach(id=>document.getElementById(id).value='');
+  go('board');
+}
+window.logManual = logManual;
+
+function resetTimer(id) {
+  const c = cases[id]; if(!c) return;
+  updateCase(id, { start:Date.now(), resets:(c.resets||0)+1, closed:false });
+}
+window.resetTimer = resetTimer;
+
+function ackCase(id) {
+  const c = cases[id]; if(!c) return;
+  const now = Date.now();
+  const sirenToAck = (c.sirenFiredAt && !c.closed) ? (now - c.sirenFiredAt) : null;
+  updateCase(id, {
+    closed: true,
+    acknowledgedAt: now,
+    acknowledgedBy: currentUser.name,
+    sirenToAckMs: sirenToAck
+  });
+}
+window.ackCase = ackCase;
+
+function clearDone() {
+  Object.entries(cases).forEach(([id,c]) => { if(c.closed) deleteCase(id); });
+}
+window.clearDone = clearDone;
+window.fullRender = fullRender;
+
+// ══ TOW TRACKER ════════════════════════════════════════
+let tows = {};
+
+// Listen to tow cases in Firebase
+const towRef = ref(db, 'tows');
+onValue(towRef, snap => {
+  tows = snap.val() || {};
+  renderTowBoard();
+});
+
+window.logTow = function() {
+  const tRef2 = document.getElementById('tRef').value.trim();
+  if(!tRef2) { document.getElementById('tRef').focus(); return; }
+  const ins = document.getElementById('tIns').value.trim();
+  const now = Date.now();
+  push(ref(db, 'tows'), {
+    ref: tRef2,
+    insurance: ins || 'Unknown',
+    agent: currentUser.name,
+    loggedAt: now,
+    confirmed: false
+  });
+  document.getElementById('tRef').value = '';
+  document.getElementById('tIns').value = '';
+};
+
+window.confirmTow = function(id) {
+  update(ref(db, 'tows/' + id), { confirmed: true, confirmedAt: Date.now() });
+};
+
+window.deleteTow = function(id) {
+  if(!confirm('Remove this tow case?')) return;
+  remove(ref(db, 'tows/' + id));
+};
+
+window.clearConfirmedTows = function() {
+  Object.entries(tows).forEach(([id, t]) => { if(t.confirmed) remove(ref(db, 'tows/' + id)); });
+};
+
+function getTowHours(loggedAt) {
+  return ((Date.now() - loggedAt) / 3600000);
+}
+
+function fmtHours(loggedAt) {
+  const totalMins = Math.floor((Date.now() - loggedAt) / 60000);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  if(h === 0) return m + 'm';
+  return h + 'h ' + String(m).padStart(2,'0') + 'm';
+}
+
+function renderTowBoard() {
+  const list = Object.entries(tows).map(([id,t])=>({...t,_id:id}));
+  list.sort((a,b)=>a.loggedAt-b.loggedAt); // oldest first — most urgent at top
+
+  let total=0, under24=0, w2448=0, over48=0, confirmed=0;
+  list.forEach(t=>{
+    if(t.confirmed){confirmed++;return;}
+    total++;
+    const hrs = getTowHours(t.loggedAt);
+    if(hrs < 24) under24++;
+    else if(hrs < 48) w2448++;
+    else over48++;
+  });
+
+  document.getElementById('tTotal').textContent = total;
+  document.getElementById('tUnder24').textContent = under24;
+  document.getElementById('t2448').textContent = w2448;
+  document.getElementById('tOver48').textContent = over48;
+  document.getElementById('tConfirmed').textContent = confirmed;
+
+  const board = document.getElementById('towBoard');
+  if(!list.length){
+    board.innerHTML = '<div class="empty">No tow cases logged yet.</div>';
+    return;
+  }
+
+  board.innerHTML = list.map(t => {
+    const hrs = getTowHours(t.loggedAt);
+    const hrsDisplay = fmtHours(t.loggedAt);
+    const isCritical = !t.confirmed && hrs >= 48;
+    const isWarning = !t.confirmed && hrs >= 24 && hrs < 48;
+    const cardClass = t.confirmed ? 'tow-card confirmed' : isCritical ? 'tow-card critical' : isWarning ? 'tow-card warning' : 'tow-card';
+    const ringClass = t.confirmed ? 'tow-hours confirmed' : isCritical ? 'tow-hours critical' : isWarning ? 'tow-hours warning' : 'tow-hours';
+    const statusClass = t.confirmed ? 'tow-status ts-confirmed' : isCritical ? 'tow-status ts-critical' : isWarning ? 'tow-status ts-warning' : 'tow-status ts-open';
+    const statusText = t.confirmed ? 'Drop-off Confirmed' : isCritical ? 'Critical — Over 48hrs' : isWarning ? 'Warning — 24-48hrs' : 'Open';
+    const urgentBadge = isCritical ? '<span class="tow-badge">&#9888; Urgent</span>' : '';
+    const logTime = new Date(t.loggedAt).toLocaleString('en-ZA', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+    let actions = '';
+    if(!t.confirmed) actions += `<button class="tow-confirm-btn" onclick="confirmTow('${t._id}')">&#10003; Confirm Drop-off</button>`;
+    if(currentUser.role === 'admin') actions += `<button class="tow-del-btn" onclick="deleteTow('${t._id}')">&#128465; Remove</button>`;
+
+    return `<div class="${cardClass}" data-tow-id="${t._id}">
+      <div class="${ringClass}">
+        <div class="tow-hour-val">${t.confirmed ? '✓' : Math.floor(hrs)}</div>
+        <div class="tow-hour-lbl">${t.confirmed ? 'done' : 'hrs'}</div>
+      </div>
+      <div class="tow-info">
+        <div class="tow-ref">${t.ref} ${urgentBadge}</div>
+        <div class="tow-sub">${t.insurance} &middot; Logged by ${t.agent} &middot; ${logTime}</div>
+      </div>
+      <div class="tow-right">
+        <span class="${statusClass}">${statusText}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Tick tow board every minute to update hours
+setInterval(renderTowBoard, 60000);
+window.renderHandoverSummary = renderHandoverSummary;
+
+// ══ INSIGHTS ═══════════════════════════════════════════
+// Set default date range to last 7 days on enterApp
+function setInsightDefaults() {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 7);
+  const toStr = to.toISOString().slice(0,10);
+  const fromStr = from.toISOString().slice(0,10);
+  const f = document.getElementById('insFrom');
+  const t = document.getElementById('insTo');
+  if(f) f.value = fromStr;
+  if(t) t.value = toStr;
+}
+
+function fmtDuration(ms) {
+  if(!ms || ms <= 0) return '—';
+  const totalMins = Math.floor(ms / 60000);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  if(h > 0) return h + 'h ' + String(m).padStart(2,'0') + 'm';
+  return m + 'm ' + String(Math.floor((ms % 60000)/1000)).padStart(2,'0') + 's';
+}
+
+window.buildInsights = function() {
+  const fromVal = document.getElementById('insFrom').value;
+  const toVal = document.getElementById('insTo').value;
+  if(!fromVal || !toVal) { alert('Please select both a from and to date.'); return; }
+
+  const fromMs = new Date(fromVal).setHours(0,0,0,0);
+  const toMs = new Date(toVal).setHours(23,59,59,999);
+
+  // Filter cases by date range
+  const allCases = Object.entries(cases).map(([id,c])=>({...c,_id:id}));
+  const filtered = allCases.filter(c => c.loggedAt >= fromMs && c.loggedAt <= toMs);
+
+  if(!filtered.length) {
+    ['insAgentTable','insResetBody','insVolumeChart','insSirenTable'].forEach(id=>{
+      document.getElementById(id).innerHTML='<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--tx2)">No cases found for this date range.</td></tr>';
+    });
+    ['kpiTotal','kpiAcked','kpiAvgAck','kpiResets','kpiHandovers'].forEach(id=>document.getElementById(id).textContent='0');
+    return;
+  }
+
+  // ── KPIs ──────────────────────────────────────────────
+  const totalCases = filtered.length;
+  const ackedCases = filtered.filter(c=>c.closed);
+  const casesWithSirenData = ackedCases.filter(c=>c.sirenToAckMs && c.sirenToAckMs > 0);
+  const avgSirenToAck = casesWithSirenData.length
+    ? casesWithSirenData.reduce((s,c)=>s+c.sirenToAckMs,0) / casesWithSirenData.length
+    : null;
+  const totalResets = filtered.reduce((s,c)=>s+(c.resets||0),0);
+  const totalHandovers = filtered.filter(c=>c.handover).length;
+
+  document.getElementById('kpiTotal').textContent = totalCases;
+  document.getElementById('kpiAcked').textContent = ackedCases.length;
+  document.getElementById('kpiAvgAck').textContent = avgSirenToAck ? fmtDuration(avgSirenToAck) : '—';
+  document.getElementById('kpiResets').textContent = totalResets;
+  document.getElementById('kpiHandovers').textContent = totalHandovers;
+
+  // ── Daily Volume Chart ──────────────────────────────
+  const dayMap = {};
+  filtered.forEach(c => {
+    const day = new Date(c.loggedAt).toLocaleDateString('en-ZA',{day:'2-digit',month:'short'});
+    dayMap[day] = (dayMap[day]||0)+1;
+  });
+  const days = Object.keys(dayMap).slice(-14); // max 14 days shown
+  const maxVol = Math.max(...days.map(d=>dayMap[d]),1);
+  const chartEl = document.getElementById('insVolumeChart');
+  chartEl.innerHTML = days.map(d=>{
+    const val = dayMap[d];
+    const pct = Math.round((val/maxVol)*100);
+    return `<div class="ins-bar-col">
+      <div class="ins-bar-col-val">${val}</div>
+      <div class="ins-bar-col-bar" style="height:${Math.max(pct,4)}px;background:var(--orange);border-radius:4px 4px 0 0;width:100%;"></div>
+      <div class="ins-bar-col-lbl">${d}</div>
+    </div>`;
+  }).join('');
+
+  // ── Agent Performance Table ─────────────────────────
+  const agentMap = {};
+  AGENTS.forEach(a => {
+    agentMap[a] = { name:a, logged:0, acked:0, sirenTimes:[], resets:0, handoversGiven:0, handoversReceived:0 };
+  });
+  // Also capture FNOL Auto
+  agentMap['FNOL Auto'] = { name:'FNOL Auto', logged:0, acked:0, sirenTimes:[], resets:0, handoversGiven:0, handoversReceived:0 };
+
+  filtered.forEach(c => {
+    const agent = c.agent || 'Unknown';
+    if(!agentMap[agent]) agentMap[agent] = { name:agent, logged:0, acked:0, sirenTimes:[], resets:0, handoversGiven:0, handoversReceived:0 };
+    agentMap[agent].logged++;
+    if(c.closed) agentMap[agent].acked++;
+    if(c.sirenToAckMs && c.sirenToAckMs > 0) agentMap[agent].sirenTimes.push(c.sirenToAckMs);
+    agentMap[agent].resets += (c.resets||0);
+    if(c.handover) {
+      if(c.handoverFrom && agentMap[c.handoverFrom]) agentMap[c.handoverFrom].handoversGiven++;
+      agentMap[agent].handoversReceived++;
+    }
+  });
+
+  const agentRows = Object.values(agentMap)
+    .filter(a=>a.logged>0)
+    .sort((a,b)=>b.logged-a.logged);
+  const maxLogged = Math.max(...agentRows.map(a=>a.logged),1);
+
+  const agentTbody = document.getElementById('insAgentTable');
+  agentTbody.innerHTML = agentRows.map((a,i)=>{
+    const avgAck = a.sirenTimes.length ? fmtDuration(a.sirenTimes.reduce((s,v)=>s+v,0)/a.sirenTimes.length) : '—';
+    const barPct = Math.round((a.logged/maxLogged)*100);
+    const ackRate = a.logged > 0 ? Math.round((a.acked/a.logged)*100) : 0;
+    const ackColor = ackRate >= 80 ? 'green' : ackRate >= 50 ? 'amber' : 'red';
+    return `<tr>
+      <td><span class="ins-rank">${i+1}</span></td>
+      <td><span class="ins-agent-badge">${a.name}</span></td>
+      <td><div class="ins-bar-wrap"><div class="ins-bar-bg"><div class="ins-bar-fill" style="width:${barPct}%"></div></div><span class="ins-val">${a.logged}</span></div></td>
+      <td><div class="ins-bar-wrap"><div class="ins-bar-bg"><div class="ins-bar-fill ${ackColor}" style="width:${ackRate}%"></div></div><span class="ins-val">${a.acked} (${ackRate}%)</span></div></td>
+      <td style="font-weight:500;color:${a.sirenTimes.length?'var(--txW)':'var(--tx2)'}">${avgAck}</td>
+      <td style="color:${a.resets>0?'var(--txD)':'var(--txS)'}">${a.resets}</td>
+      <td>${a.handoversGiven}</td>
+      <td>${a.handoversReceived}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Siren Response Detail ───────────────────────────
+  const sirenAgents = agentRows.filter(a=>a.sirenTimes.length>0).sort((a,b)=>{
+    const avgA = a.sirenTimes.reduce((s,v)=>s+v,0)/a.sirenTimes.length;
+    const avgB = b.sirenTimes.reduce((s,v)=>s+v,0)/b.sirenTimes.length;
+    return avgA - avgB; // fastest first
+  });
+  const sirenEl = document.getElementById('insSirenTable');
+  if(!sirenAgents.length) {
+    sirenEl.innerHTML = '<div class="ins-empty">No siren response data yet. Data will appear here once agents start acknowledging overdue cases.</div>';
+  } else {
+    const maxAvg = Math.max(...sirenAgents.map(a=>a.sirenTimes.reduce((s,v)=>s+v,0)/a.sirenTimes.length));
+    sirenEl.innerHTML = `<table class="ins-table"><thead><tr><th>#</th><th>Agent</th><th>Times Siren Fired</th><th>Fastest Response</th><th>Slowest Response</th><th>Avg Response Time</th><th>Performance</th></tr></thead><tbody>`+
+    sirenAgents.map((a,i)=>{
+      const avg = a.sirenTimes.reduce((s,v)=>s+v,0)/a.sirenTimes.length;
+      const fastest = Math.min(...a.sirenTimes);
+      const slowest = Math.max(...a.sirenTimes);
+      const barPct = Math.round((1-(avg/maxAvg))*100); // inverted — faster = longer bar
+      const perfColor = avg < 300000?'green':avg < 600000?'amber':'red'; // <5min=green, <10min=amber, else red
+      const perfLabel = avg < 300000?'Excellent':avg < 600000?'Good':'Needs attention';
+      return `<tr>
+        <td><span class="ins-rank">${i+1}</span></td>
+        <td><span class="ins-agent-badge">${a.name}</span></td>
+        <td style="text-align:center">${a.sirenTimes.length}</td>
+        <td style="color:var(--txS);font-weight:500">${fmtDuration(fastest)}</td>
+        <td style="color:var(--txD)">${fmtDuration(slowest)}</td>
+        <td style="font-weight:500">${fmtDuration(avg)}</td>
+        <td><div class="ins-bar-wrap"><div class="ins-bar-bg"><div class="ins-bar-fill ${perfColor}" style="width:${Math.max(barPct,5)}%"></div></div><span class="ins-val" style="color:var(--tx2);font-size:10px">${perfLabel}</span></div></td>
+      </tr>`;
+    }).join('')+'</tbody></table>';
+  }
+
+  // ── Reset Analysis ──────────────────────────────────
+  const resetCases = filtered.filter(c=>(c.resets||0)>0).sort((a,b)=>b.resets-a.resets).slice(0,20);
+  const resetTbody = document.getElementById('insResetBody');
+  if(!resetCases.length) {
+    resetTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--tx2)">No resets recorded in this period.</td></tr>';
+  } else {
+    resetTbody.innerHTML = resetCases.map((c,i)=>{
+      const logDate = new Date(c.loggedAt).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'});
+      return `<tr>
+        <td><span class="ins-rank">${i+1}</span></td>
+        <td style="font-weight:500">${c.ref}</td>
+        <td>${c.insurance||'—'}</td>
+        <td><span class="ins-agent-badge">${c.agent||'—'}</span></td>
+        <td style="color:var(--txD);font-weight:600;text-align:center">${c.resets}</td>
+        <td style="color:var(--tx2)">${logDate}</td>
+      </tr>`;
+    }).join('');
+  }
+};
+
+// ══ INSIGHTS EXCEL EXPORT ══════════════════════════════
+window.exportInsightsExcel = function() {
+  const fromVal = document.getElementById('insFrom').value;
+  const toVal = document.getElementById('insTo').value;
+  if(!fromVal || !toVal) { alert('Please apply a date range first.'); return; }
+
+  const fromMs = new Date(fromVal).setHours(0,0,0,0);
+  const toMs = new Date(toVal).setHours(23,59,59,999);
+  const allCases = Object.entries(cases).map(([id,c])=>({...c,_id:id}));
+  const filtered = allCases.filter(c => c.loggedAt >= fromMs && c.loggedAt <= toMs);
+
+  const rows = [
+    ['Case Ref','Insurance','Plate','Agent','Logged At','Acknowledged','Acknowledged By','Acknowledged At',
+     'Siren Fired At','Siren to Ack (mins)','Times Reset','Handed Over','Handed From','Handed To','Status']
+  ];
+
+  filtered.forEach(c => {
+    const sirenToAckMins = c.sirenToAckMs ? Math.round(c.sirenToAckMs/60000) : '';
+    rows.push([
+      c.ref||'', c.insurance||'', c.plate||'', c.agent||'',
+      c.loggedAt ? new Date(c.loggedAt).toLocaleString('en-ZA') : '',
+      c.closed ? 'Yes' : 'No',
+      c.acknowledgedBy||'',
+      c.acknowledgedAt ? new Date(c.acknowledgedAt).toLocaleString('en-ZA') : '',
+      c.sirenFiredAt ? new Date(c.sirenFiredAt).toLocaleString('en-ZA') : '',
+      sirenToAckMins,
+      c.resets||0,
+      c.handover?'Yes':'No',
+      c.handoverFrom||'',
+      c.handover?c.agent:'',
+      c.closed?'Acknowledged':'Active'
+    ]);
+  });
+
+  let csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url;
+  a.download='HCV_Insights_'+fromVal+'_to_'+toVal+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+// ══ PARSE FNOL ═════════════════════════════════════════
+function parseFNOL(txt) {
+  const get=re=>{ const m=txt.match(re); return m?m[1].trim():''; };
+  const ref3=get(/Case Reference:\s*(\S+)/i)||get(/case\s+(\S+)\s+has been created/i);
+  let ins=get(/Dear\s+(.+?)(?:\s+-\s+\S|\n)/i);
+  ins=ins.replace(/\s*-\s*\S[\s\S]*$/,'').trim();
+  const plate=get(/Licen[sc]e Plate Number:\s*([^\n\r\t]+)/i);
+  let cust=get(/Customer Name:\s*([^\n\r]+)/i);
+  if(cust.includes(' - ')) cust=cust.split(' - ')[0].trim();
+  const pickup=get(/Pick Up:\s*([^\n\r]+)/i);
+  const dest=get(/Destination Name:\s*([^\n\r]+)/i);
+  return {ref:ref3,insurance:ins,plate,customer:cust,pickup,destination:dest};
+}
+
+function parseAndLoad() {
+  const txt=document.getElementById('fnolPaste').value.trim();
+  const ok=document.getElementById('parseOk'), err=document.getElementById('parseErr');
+  ok.style.display='none'; err.style.display='none';
+  if(!txt) { err.textContent='Please paste an FNOL email first.'; err.style.display='block'; return; }
+  const p=parseFNOL(txt);
+  if(!p.ref) { err.textContent='Could not find a case reference. Check the email format.'; err.style.display='block'; return; }
+  const now=Date.now();
+  const data={ref:p.ref,insurance:p.insurance||'Unknown',agent:currentUser.name,
+    plate:p.plate||'',customer:p.customer||'',pickup:p.pickup||'',destination:p.destination||'',
+    windowMs:(parseInt(document.getElementById('aWin').value)||30)*60000,
+    start:now,loggedAt:now,closed:false,resets:0,
+    handover:false,prevAgent:null,handoverFrom:null,handoverAt:null,auto:true};
+  pushCase(data);
+  document.getElementById('fnolPaste').value='';
+  ok.textContent='Case '+p.ref+' ('+p.insurance+') loaded and synced to all users.';
+  ok.style.display='block';
+  setTimeout(()=>{ok.style.display='none';},4000);
+  go('board');
+}
+window.parseAndLoad = parseAndLoad;
+
+// ══ VISIBILITY ═════════════════════════════════════════
+function getVisible() {
+  if(!currentUser) return [];
+  let list = Object.entries(cases).map(([id,c])=>({...c, _id:id}));
+  // Sort newest first
+  list.sort((a,b)=>b.loggedAt-a.loggedAt);
+  if(currentUser.role==='agent') {
+    // Agents only see their own cases
+    list = list.filter(c=>c.agent===currentUser.name);
+    // For agents: by default hide acknowledged — but if they explicitly
+    // want to see their acknowledged history they can't filter (no filter bar)
+    // So we just hide closed from default agent view
+    list = list.filter(c=>!c.closed);
+  } else {
+    const af=document.getElementById('fAgent')?.value||'all';
+    const sf=document.getElementById('fStatus')?.value||'all';
+    const now=Date.now();
+    if(af!=='all') list=list.filter(c=>c.agent===af);
+    if(sf==='active') list=list.filter(c=>!c.closed&&(now-c.start)<c.windowMs);
+    else if(sf==='overdue') list=list.filter(c=>!c.closed&&(now-c.start)>=c.windowMs);
+    else if(sf==='done') list=list.filter(c=>c.closed);
+    else {
+      // Default "all statuses" — show active and overdue but NOT acknowledged
+      // Acknowledged cases clutter the board; use the "Acknowledged" filter to see them
+      list = list.filter(c=>!c.closed);
+    }
+  }
+  return list;
+}
+
+// ══ SIREN ══════════════════════════════════════════════
+function checkSiren() {
+  if(!currentUser) return;
+  const now=Date.now();
+  const od=getVisible().filter(c=>!c.closed&&(now-c.start)>=c.windowMs);
+  const el=document.getElementById('siren');
+  if(od.length) {
+    el.classList.add('on');
+    document.getElementById('sirenTxt').textContent='Overdue: '+od.map(c=>c.ref).join(', ')+' — follow up immediately!';
+    startSiren();
+    // Record sirenFiredAt for each newly overdue case (only once)
+    od.forEach(c => {
+      if(!c.sirenFiredAt) {
+        updateCase(c._id, { sirenFiredAt: now });
+      }
+    });
+  } else {
+    el.classList.remove('on'); stopSiren();
+  }
+}
+
+// ══ RENDER ═════════════════════════════════════════════
+function col(u,w,d) { return d?'#aaa':u?'#E24B4A':w?'#EF9F27':'#F47920'; }
+function ringHTML(ratio,c) {
+  const r=22,ci=+(2*Math.PI*r).toFixed(1),da=+(Math.max(0,ratio)*ci).toFixed(1);
+  return `<svg width="52" height="52" viewBox="0 0 52 52" style="transform:rotate(-90deg);position:absolute;top:0;left:0">
+    <circle cx="26" cy="26" r="${r}" fill="none" stroke="#ddd" stroke-width="3"/>
+    <circle class="arc" cx="26" cy="26" r="${r}" fill="none" stroke="${c}" stroke-width="3" stroke-dasharray="${da} ${ci}" stroke-linecap="round"/></svg>`;
+}
+function fmtCD(ms) {
+  if(ms<=0)return'OVERDUE';
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  return h>0?h+'h '+String(m).padStart(2,'0')+'m':String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
+}
+function fmtEl(ms) {
+  const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);
+  return m===0?s+'s elapsed':m+'m '+String(s).padStart(2,'0')+'s elapsed';
+}
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}); }
+
+function buildCard(c) {
+  const id=c._id;
+  const now=Date.now(),el=now-c.start,tel=now-c.loggedAt,rem=c.windowMs-el;
+  const ratio=Math.max(0,rem/c.windowMs);
+  const u=!c.closed&&rem<=0,w=!c.closed&&rem>0&&rem<=900000;
+  const clr=col(u,w,c.closed);
+  const sc=c.closed?'s-done':u?'s-urgent':w?'s-warned':'s-active';
+  const st=c.closed?'Acknowledged':u?'Overdue':w?'Warning':'Active';
+  const cc='card'+(c.closed?' done':u?' urgent':w?' warned':'')+(c.handover?' handover':'');
+  const rb=c.resets>0?`<span class="badge rst">&#8635; &times;${c.resets}</span>`:'';
+  const hb=c.handover?`<span class="badge ho">&#128260; From: ${c.handoverFrom}</span>`:'';
+  const rv=c.closed?'':u?'OVERDUE':fmtCD(rem)+' left';
+  const barPct=c.closed?0:Math.round(ratio*100);
+  const isOwner=currentUser.role==='admin'||c.agent===currentUser.name;
+  let acts='';
+  if(!c.closed&&isOwner) acts+=`<button class="btn ho-btn" onclick="openHO('${id}')">&#128260; Hand Over</button>`;
+  if(!c.closed&&u&&isOwner) acts+=`<button class="btn warn" onclick="resetTimer('${id}')">&#8635; Reset</button>`;
+  if(!c.closed&&isOwner) acts+=`<button class="btn" onclick="ackCase('${id}')">&#10003; Acknowledge</button>`;
+  if(c.closed) acts+=`<button class="case-history-btn" onclick="openReport('${id}')">&#128203; History</button>`;
+  return `<div class="${cc}" data-id="${id}">
+    <div class="ring-wrap">${ringHTML(ratio,clr)}
+      <div class="ring-inner"><div class="ring-cd" style="color:${clr}" data-cd>${c.closed?'&#10003;':u?'!!':fmtCD(rem)}</div>
+      <div class="ring-sub">${c.closed?'done':u?'overdue':'remaining'}</div></div>
+    </div>
+    <div class="cinfo">
+      <div class="cref-row"><span class="cref">${c.ref}</span>${hb}${rb}</div>
+      <div class="csub">${c.insurance} &middot; <strong>${c.agent}</strong> &middot; ${fmtTime(c.loggedAt)}${c.plate?' &middot; '+c.plate:''}</div>
+      <div class="bar-lbls">
+        <span class="bar-lbl" data-el>${c.closed?'Acknowledged':fmtEl(tel)}</span>
+        <span class="bar-lbl r" style="color:${clr}" data-rem>${rv}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" data-bar style="width:${barPct}%;background:${clr}"></div></div>
+    </div>
+    <div class="cright">
+      <span class="cstatus ${sc}" data-st>${st}</span>
+      <div class="cactions" data-acts>${acts}</div>
+    </div>
+  </div>`;
+}
+
+function renderHandoverSummary() {
+  const allCases = Object.entries(cases).map(([id,c])=>({...c,_id:id}));
+  let handovers = allCases.filter(c=>c.handover && c.handoverFrom);
+  handovers.sort((a,b)=>(b.handoverAt||0)-(a.handoverAt||0));
+
+  // Apply date range filter if set
+  const fromEl = document.getElementById('hoDateFrom');
+  const toEl = document.getElementById('hoDateTo');
+  if(fromEl && fromEl.value) {
+    const fromMs = new Date(fromEl.value).setHours(0,0,0,0);
+    handovers = handovers.filter(c=>(c.handoverAt||0) >= fromMs);
+  }
+  if(toEl && toEl.value) {
+    const toMs = new Date(toEl.value).setHours(23,59,59,999);
+    handovers = handovers.filter(c=>(c.handoverAt||0) <= toMs);
+  }
+
+  // Filter by role - agents only see handovers involving them
+  const visible = currentUser.role==='admin'
+    ? handovers
+    : handovers.filter(c=>c.agent===currentUser.name||c.handoverFrom===currentUser.name);
+
+  document.getElementById('hoCount').textContent = visible.length;
+  const tbody = document.getElementById('hoTableBody');
+  if(!visible.length){
+    tbody.innerHTML='<tr><td colspan="6" class="ho-empty">No handovers recorded yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = visible.map(c=>{
+    const hoTime = c.handoverAt ? new Date(c.handoverAt).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const statusText = c.closed?'Acknowledged':'Active';
+    const statusCol = c.closed?'color:var(--tx2)':'color:var(--txW);font-weight:500';
+    return `<tr>
+      <td><span class="ho-ref">${c.ref}</span></td>
+      <td>${c.insurance||'—'}</td>
+      <td><span class="ho-badge-from">${c.handoverFrom}</span></td>
+      <td><span class="ho-badge-to">${c.agent}</span></td>
+      <td><span class="ho-time">${hoTime}</span></td>
+      <td><span style="${statusCol}">${statusText}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function fullRender() {
+  if(!currentUser) return;
+  const now=Date.now(), vis=getVisible();
+  // Stats reflect the current filter so board and stats are always in sync
+  let tot=vis.length,act=0,od=0,dn=0;
+  vis.forEach(c=>{ if(c.closed)dn++; else if((now-c.start)>=c.windowMs)od++; else act++; });
+  document.getElementById('sTotal').textContent=tot;
+  document.getElementById('sActive').textContent=act;
+  document.getElementById('sOver').textContent=od;
+  document.getElementById('sDone').textContent=dn;
+  document.getElementById('board').innerHTML=vis.length?vis.map(buildCard).join(''):'<div class="empty">No cases to display.</div>';
+  renderAgentTable();
+  renderHandoverSummary();
+}
+
+// ══ TICK — updates countdowns every second ══════════════
+function tick() {
+  if(!currentUser) return;
+  const now=Date.now(), vis=getVisible();
+  // Stats reflect current filter — always in sync with board
+  let tot=vis.length,act=0,od=0,dn=0;
+  vis.forEach(c=>{ if(c.closed)dn++; else if((now-c.start)>=c.windowMs)od++; else act++; });
+  vis.forEach(c=>{
+    if(c.closed){dn++;return;}
+    const el=now-c.start,tel=now-c.loggedAt,rem=c.windowMs-el;
+    const ratio=Math.max(0,rem/c.windowMs);
+    const u=rem<=0,w=rem>0&&rem<=900000;
+    if(u)od++;else act++;
+    const clr=col(u,w,false);
+    const id=c._id;
+    const card=document.querySelector(`.card[data-id="${id}"]`);
+    if(!card) return;
+    const wasU=card.classList.contains('urgent'),wasW=card.classList.contains('warned');
+    if(u!==wasU||w!==wasW) {
+      card.className='card'+(u?' urgent':w?' warned':'')+(c.handover?' handover':'');
+      const da=card.querySelector('[data-acts]');
+      if(da) {
+        const io=currentUser.role==='admin'||c.agent===currentUser.name;
+        let a='';
+        if(io) a+=`<button class="btn ho-btn" onclick="openHO('${id}')">&#128260; Hand Over</button>`;
+        if(u&&io) a+=`<button class="btn warn" onclick="resetTimer('${id}')">&#8635; Reset</button>`;
+        if(io) a+=`<button class="btn" onclick="ackCase('${id}')">&#10003; Acknowledge</button>`;
+        da.innerHTML=a;
+      }
+    }
+    const cd=card.querySelector('[data-cd]'); if(cd){cd.textContent=u?'!!':fmtCD(rem);cd.style.color=clr;}
+    const eli=card.querySelector('[data-el]'); if(eli)eli.textContent=fmtEl(tel);
+    const rv=card.querySelector('[data-rem]'); if(rv){rv.textContent=u?'OVERDUE':fmtCD(rem)+' left';rv.style.color=clr;}
+    const bar=card.querySelector('[data-bar]'); if(bar){bar.style.width=Math.round(ratio*100)+'%';bar.style.background=clr;}
+    const arc=card.querySelector('.arc');
+    if(arc){const r=22,ci=+(2*Math.PI*r).toFixed(1),da2=+(ratio*ci).toFixed(1);arc.setAttribute('stroke-dasharray',da2+' '+ci);arc.setAttribute('stroke',clr);}
+    const sti=card.querySelector('[data-st]'); if(sti){sti.textContent=u?'Overdue':w?'Warning':'Active';sti.className='cstatus '+(u?'s-urgent':w?'s-warned':'s-active');}
+  });
+  document.getElementById('sTotal').textContent=tot;
+  document.getElementById('sActive').textContent=act;
+  document.getElementById('sOver').textContent=od;
+  document.getElementById('sDone').textContent=dn;
+  document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  checkSiren();
+}
+
+// ══ INIT ═══════════════════════════════════════════════
+// Populate dropdowns immediately with hardcoded defaults
+populateDDs();
+// Start Firebase listeners immediately
+startListening();
+
+// Hide connecting overlay and show login after brief connection window
+setTimeout(() => {
+  document.getElementById('connectingOverlay').style.display = 'none';
+  // Try restore session
+  try {
+    const saved = sessionStorage.getItem('hcv_session');
+    if(saved) {
+      currentUser = JSON.parse(saved);
+      enterApp();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+  } catch(e) {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+}, 2000);
+
+setInterval(tick, 1000);
+
+document.getElementById('mRef').addEventListener('keydown', e=>{ if(e.key==='Enter') logManual(); });
+document.getElementById('adminPass').addEventListener('keydown', e=>{ if(e.key==='Enter') loginAdmin(); });
+document.getElementById('hoModal').addEventListener('click', function(e){ if(e.target===this) closeHO(); });
+document.getElementById('reportModal').addEventListener('click', function(e){ if(e.target===this) closeReport(); });
+
+// ══ EXCEL EXPORT — HANDOVER LOG ════════════════════════
+window.exportHandoverExcel = function() {
+  const allCases = Object.entries(cases).map(([id,c])=>({...c,_id:id}));
+  const handovers = allCases.filter(c=>c.handover && c.handoverFrom);
+  handovers.sort((a,b)=>(b.handoverAt||0)-(a.handoverAt||0));
+
+  const rows = [
+    ['Case Ref','Insurance','Licence Plate','Handed From','Handed To','Handover Time','Status','Times Reset']
+  ];
+  handovers.forEach(c=>{
+    const hoTime = c.handoverAt ? new Date(c.handoverAt).toLocaleString('en-ZA') : '—';
+    rows.push([
+      c.ref||'—', c.insurance||'—', c.plate||'—',
+      c.handoverFrom||'—', c.agent||'—', hoTime,
+      c.closed?'Acknowledged':'Active', c.resets||0
+    ]);
+  });
+
+  let csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='HCV_Handover_Log_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+// ══ CASE HISTORY REPORT ════════════════════════════════
+let currentReportId = null;
+
+window.openReport = function(id) {
+  const c = cases[id]; if(!c) return;
+  currentReportId = id;
+  document.getElementById('reportRef').textContent = 'Case: '+c.ref+' — '+c.insurance+(c.plate?' ('+c.plate+')':'');
+
+  const loggedAt = c.loggedAt ? new Date(c.loggedAt).toLocaleString('en-ZA') : '—';
+  const hoTime = c.handoverAt ? new Date(c.handoverAt).toLocaleString('en-ZA') : null;
+
+  // Calculate total time from log to acknowledge
+  let totalDuration = '—';
+  if(c.loggedAt && c.closed) {
+    const diffMs = Date.now() - c.loggedAt;
+    const h = Math.floor(diffMs/3600000);
+    const m = Math.floor((diffMs%3600000)/60000);
+    totalDuration = h>0?h+'h '+m+'m':m+'m';
+  }
+
+  const html = `
+    <div class="report-section">
+      <div class="report-section-title">Case Details</div>
+      <div class="report-row"><span class="report-label">Case Reference</span><span class="report-value">${c.ref||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Insurance</span><span class="report-value">${c.insurance||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Licence Plate</span><span class="report-value">${c.plate||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Logged by</span><span class="report-value">${c.agent||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Logged at</span><span class="report-value">${loggedAt}</span></div>
+      <div class="report-row"><span class="report-label">Follow-up window</span><span class="report-value">${Math.round((c.windowMs||1800000)/60000)} minutes</span></div>
+      <div class="report-row"><span class="report-label">Total case duration</span><span class="report-value">${totalDuration}</span></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">Activity Summary</div>
+      <div class="report-row"><span class="report-label">Timer resets</span><span class="report-value" style="color:${(c.resets||0)>0?'var(--txW)':'var(--txS)'}">${c.resets||0} time${(c.resets||0)===1?'':'s'}</span></div>
+      <div class="report-row"><span class="report-label">Handed over</span><span class="report-value">${c.handover?'Yes':'No'}</span></div>
+      ${c.handover?`<div class="report-row"><span class="report-label">Handed from</span><span class="report-value">${c.handoverFrom||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Handed to</span><span class="report-value">${c.agent||'—'}</span></div>
+      <div class="report-row"><span class="report-label">Handover time</span><span class="report-value">${hoTime||'—'}</span></div>`:''}
+      <div class="report-row"><span class="report-label">Status</span><span class="report-value" style="color:var(--txS)">Acknowledged</span></div>
+    </div>
+
+    <div class="report-section">
+      <div class="report-section-title">Case Timeline</div>
+      <div class="report-timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--orange)"></div>
+          <div class="timeline-text"><strong>Case logged</strong> by ${c.agent||'—'} at ${loggedAt}</div>
+        </div>
+        ${(c.resets||0)>0?`<div class="timeline-item">
+          <div class="timeline-dot" style="background:#EF9F27"></div>
+          <div class="timeline-text"><strong>Timer reset</strong> ${c.resets} time${c.resets===1?'':'s'} — case required additional follow-up time</div>
+        </div>`:''}
+        ${c.handover?`<div class="timeline-item">
+          <div class="timeline-dot" style="background:#7dc456"></div>
+          <div class="timeline-text"><strong>Handed over</strong> from ${c.handoverFrom} to ${c.agent} at ${hoTime||'—'}</div>
+        </div>`:''}
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--txS, #3b6d11)"></div>
+          <div class="timeline-text"><strong>Acknowledged</strong> — case resolved</div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('reportContent').innerHTML = html;
+  document.getElementById('reportModal').classList.add('on');
+};
+
+window.applyHoDateFilter = function() { renderHandoverSummary(); };
+window.clearHoDateFilter = function() {
+  const f=document.getElementById('hoDateFrom');
+  const t=document.getElementById('hoDateTo');
+  if(f) f.value='';
+  if(t) t.value='';
+  renderHandoverSummary();
+};
+
+window.closeReport = function() {
+  currentReportId = null;
+  document.getElementById('reportModal').classList.remove('on');
+};
+
+// ══ EXCEL EXPORT — CASE HISTORY REPORT ════════════════
+window.exportCaseReportExcel = function() {
+  if(!currentReportId) return;
+  const c = cases[currentReportId]; if(!c) return;
+  const loggedAt = c.loggedAt ? new Date(c.loggedAt).toLocaleString('en-ZA') : '—';
+  const hoTime = c.handoverAt ? new Date(c.handoverAt).toLocaleString('en-ZA') : '—';
+
+  const rows = [
+    ['Field','Value'],
+    ['Case Reference', c.ref||'—'],
+    ['Insurance', c.insurance||'—'],
+    ['Licence Plate', c.plate||'—'],
+    ['Logged By', c.agent||'—'],
+    ['Logged At', loggedAt],
+    ['Follow-up Window (min)', Math.round((c.windowMs||1800000)/60000)],
+    ['Times Reset', c.resets||0],
+    ['Handed Over', c.handover?'Yes':'No'],
+    ['Handed From', c.handoverFrom||'N/A'],
+    ['Handed To', c.handover?c.agent:'N/A'],
+    ['Handover Time', c.handover?hoTime:'N/A'],
+    ['Status', 'Acknowledged'],
+  ];
+
+  let csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='Case_History_'+c.ref+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+</script>
+</body>
+</html>
